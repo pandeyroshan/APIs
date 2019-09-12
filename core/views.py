@@ -10,7 +10,8 @@ from rest_framework.status import (
     HTTP_200_OK
 )
 from rest_framework.response import Response
-
+from .models import dataSet
+from django.core import serializers
 
 @csrf_exempt
 @api_view(["POST"])
@@ -38,10 +39,20 @@ def register(request):
     password = request.data.get("password")
     user = User.objects.create_user(username, email, password)
     print(user)
-    return Response({'message':'success'},status=HTTP_200_OK)
+    return Response({'message':'User Registered'},status=HTTP_200_OK)
 
 @csrf_exempt
 @api_view(["GET"])
-def sample_api(request):
-    data = {'sample_data': 123}
-    return Response(data, status=HTTP_200_OK)
+def getData(request):
+    data = dataSet.objects.all()
+    json_data = serializers.serialize('json', data)
+    return Response(json_data, status=HTTP_200_OK)
+
+@csrf_exempt
+@api_view(["POST"])
+def postData(request):
+    topic = request.data.get('topic')
+    text = request.data.get('text')
+    obj = dataSet.objects.create(topic=topic,text=text)
+    obj.save()
+    return Response({'message':'Data Saved'},status=HTTP_200_OK)
